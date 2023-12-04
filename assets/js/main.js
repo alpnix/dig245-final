@@ -1,6 +1,6 @@
 /* TODOs: 
  - load Bootstrap JS cdn to have option in the hamburger menu
- - add more content and courses into s learn page section
+ - add more content and courses into learn page section
 */ 
 
 var pageContainer = document.querySelector(".page.container");
@@ -9,6 +9,8 @@ var pageContainer = document.querySelector(".page.container");
 var homeButton = document.querySelector(".nav-home");
 var learnButton = document.querySelector(".nav-learn");
 var forumButton = document.querySelector(".nav-forum");
+var brandButton = document.querySelector(".navbar-brand");
+
 var randomFactBox = document.querySelector(".fact-box p");
 
 if (localStorage.getItem("lat") && localStorage.getItem("long")) {
@@ -22,7 +24,7 @@ if (window.navigator.geolocation) {
         var long = position.coords.longitude;
         localStorage.setItem("lat", lat);
         localStorage.setItem("long", long);
-        mapInit(lat, long);
+        // mapInit(lat, long);
     }, e => {
         console.log(e); 
         mapInit(37.402179, 35.652607);
@@ -67,21 +69,31 @@ var earthquakeFacts = [
 const randomFact = earthquakeFacts[Math.floor(Math.random() * earthquakeFacts.length)];
 randomFactBox.innerHTML = randomFact; 
 
+brandButton.addEventListener("click", e => {
+    e.preventDefault();
+    // localStorage.setItem("page", "home");
+    window.location.hash = "";
+    loadHome()
+})
+
 homeButton.addEventListener("click", e => {
     e.preventDefault();
-    localStorage.setItem("page", "home");
+    // localStorage.setItem("page", "home");
+    window.location.hash = "";
     loadHome()
 })
 
 learnButton.addEventListener("click", e => {
     e.preventDefault();
-    localStorage.setItem("page", "learn");
+    // localStorage.setItem("page", "learn");
+    window.location.hash = "learn";
     loadLearn();
 })
 
 forumButton.addEventListener("click", e => {
     e.preventDefault(); 
-    localStorage.setItem("page", "forum");
+    // localStorage.setItem("page", "forum");
+    window.location.hash = "forum";
     loadForum();
 })
 
@@ -233,16 +245,27 @@ function loadForum() {
       pageContainer.innerHTML = forumInner;
 }
 
-// store the previously visited page even if the page is reloaded
-if (localStorage.getItem("page") == "home") {
-    loadHome();
-} 
-else if (localStorage.getItem("page") == "learn") {
+// if a current hash is present
+if (window.location.hash == "#learn") {
     loadLearn();
 }
-else if (localStorage.getItem("page") == "forum") {
+else if (window.location.hash == "#forum") {
     loadForum();
 }
+else {
+    loadHome();
+}
+
+// // store the previously visited page even if the page is reloaded
+// if (localStorage.getItem("page") == "home") {
+//     loadHome();
+// } 
+// else if (localStorage.getItem("page") == "learn") {
+//     loadLearn();
+// }
+// else if (localStorage.getItem("page") == "forum") {
+//     loadForum();
+// }
 
 // initialize map 
 function mapInit(lat, long) {
