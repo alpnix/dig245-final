@@ -1,6 +1,5 @@
 /* TODOs: 
- - load Bootstrap JS cdn to have option in the hamburger menu
- - add more content and courses into learn page section
+ - add slider below menu, manipulate and visualize data in ways
 */ 
 
 var pageContainer = document.querySelector(".page.container");
@@ -13,21 +12,30 @@ var brandButton = document.querySelector(".navbar-brand");
 
 var randomFactBox = document.querySelector(".fact-box p");
 
+// var slider = document.querySelector("#yearSlider");
+// var sliderValue = document.querySelector("#yearVal");
+// console.log(slider);
+// // when slider value is changed 
+// slider.addEventListener("input", e => {
+//     // mapInit(localStorage.getItem("lat"), localStorage.getItem("long")); 
+//     sliderValue.innerHTML = e.target.value; 
+// })
+
+
 if (localStorage.getItem("lat") && localStorage.getItem("long")) {
     mapInit(localStorage.getItem("lat"), localStorage.getItem("long")); 
 }
 
-if (window.navigator.geolocation) {
+if (!window.navigator.geolocation) {
     window.navigator.geolocation
     .getCurrentPosition(position => {
         var lat = position.coords.latitude;
         var long = position.coords.longitude;
         localStorage.setItem("lat", lat);
         localStorage.setItem("long", long);
-        // mapInit(lat, long);
+        mapInit(lat, long);
     }, e => {
         console.log(e); 
-        mapInit(37.402179, 35.652607);
     });
 }
 
@@ -73,14 +81,14 @@ brandButton.addEventListener("click", e => {
     e.preventDefault();
     // localStorage.setItem("page", "home");
     window.location.hash = "";
-    loadHome()
+    loadHome();
 })
 
 homeButton.addEventListener("click", e => {
     e.preventDefault();
     // localStorage.setItem("page", "home");
     window.location.hash = "";
-    loadHome()
+    loadHome();
 })
 
 learnButton.addEventListener("click", e => {
@@ -232,7 +240,11 @@ function loadForum() {
         <div class="col-md-12 post">
             <h2>The Great Alaska Earthquake of 1964 Documentary</h2>
             <span class="author">By: <a href="https://www.reddit.com/user/CryptoWiz99/">CryptoWiz99</a></span>
-            <p>Video is shared in the Read More section</p>
+            <p>
+                <iframe id="ytplayer" type="text/html" width="640" height="360"
+                src="https://www.youtube.com/embed/jDdhgtZPzkA?autoplay=1&origin=http://example.com"
+                frameborder="0"></iframe>
+            </p>
             <p><a class="btn btn-primary" target="_blank" href="https://www.reddit.com/r/Earthquakes/comments/181wslf/the_great_alaska_earthquake_of_1964_documentary/" role="button">Read More &raquo;</a></p>
         </div>    
         <div class="col-md-12 post">
@@ -296,6 +308,16 @@ function mapInit(lat, long) {
     fetch("./locations.json")
         .then(response => response.json())
         .then((json) => {
+            data = []
+            for (let feature of json.features) {
+                let d = new Date(0); 
+                d.setUTCMilliseconds(feature["properties"]["time"]);
+                let year = d.getFullYear();
+                // if (sliderValue.innerHTML > year) {
+                data.push(feature); 
+                // }
+            }
+            json.features = data; 
             L.geoJSON(json).addTo(map);
         })
 }

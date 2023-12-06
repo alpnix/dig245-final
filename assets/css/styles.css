@@ -1,7 +1,17 @@
 
 /* css */
-body { 
-    background: url("https://www.textures4photoshop.com/tex/thumbs/crack-texture-png-free-thumb22.png");
+body::before {
+    content: "";
+    background-image: url('https://www.textures4photoshop.com/tex/thumbs/crack-texture-png-free-thumb22.png');
+    background-size: cover;
+    position: absolute;
+    top: 40px;
+    right: 0px;
+    bottom: 0px;
+    left: 0px;
+    opacity: 0.3;
+    z-index: -9999;
+    transform: scaleY(-1);
 }
 
 #map { 
@@ -37,9 +47,18 @@ body {
     margin: 2px 5px !important;
 }
 
+.navbar {
+    background-color: rgba(15, 12, 10, 0.85) !important;
+}
+
+.nav-item {
+    color: white !important;
+}
+
 a.navbar-brand {
     color: #106DF9 !important;
-    font-style: italic
+    font-style: italic;
+    font-size: 1.6rem;
 }
 
 a.active { 
