@@ -18,7 +18,7 @@ var randomFactBox = document.querySelector(".fact-box p");
 
 var slider = document.querySelector("#yearSlider");
 var sliderValue = document.querySelector("#yearVal");
-console.log(slider);
+
 // when slider value is changed 
 slider.addEventListener("change", e => {
     sliderValue.innerHTML = e.target.value; 
@@ -271,15 +271,15 @@ function loadForum() {
 }
 
 // if a current hash is present
-// if (window.location.hash == "#learn") {
-//     loadLearn();
-// }
-// else if (window.location.hash == "#forum") {
-//     loadForum();
-// }
-// else {
-//     loadHome();
-// }
+if (window.location.hash == "#learn") {
+    loadLearn();
+}
+else if (window.location.hash == "#forum") {
+    loadForum();
+}
+else {
+    loadHome();
+}
 
 // // store the previously visited page even if the page is reloaded
 // if (localStorage.getItem("page") == "home") {
@@ -367,4 +367,5 @@ function mapInit(lat, long, zoom=11, popup=true) {
                 onEachFeature
             }).addTo(map);
         })
+        console.log(map);
 }
