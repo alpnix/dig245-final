@@ -1,6 +1,10 @@
 /* TODOs: 
  - add slider below menu, manipulate and visualize data in ways
+ - add popup on the map for clarity
+ - check responsiveness in different screen sizes
+ - 
 */ 
+var map;
 
 var pageContainer = document.querySelector(".page.container");
 
@@ -12,14 +16,19 @@ var brandButton = document.querySelector(".navbar-brand");
 
 var randomFactBox = document.querySelector(".fact-box p");
 
-// var slider = document.querySelector("#yearSlider");
-// var sliderValue = document.querySelector("#yearVal");
-// console.log(slider);
-// // when slider value is changed 
-// slider.addEventListener("input", e => {
-//     // mapInit(localStorage.getItem("lat"), localStorage.getItem("long")); 
-//     sliderValue.innerHTML = e.target.value; 
-// })
+var slider = document.querySelector("#yearSlider");
+var sliderValue = document.querySelector("#yearVal");
+console.log(slider);
+// when slider value is changed 
+slider.addEventListener("change", e => {
+    sliderValue.innerHTML = e.target.value; 
+    map.remove(); 
+    if (localStorage.getItem("lat") && localStorage.getItem("long")) {
+        mapInit(localStorage.getItem("lat"), localStorage.getItem("long"), 1, false);
+    } else { 
+        mapInit(35.499302, -80.848686, 1, false);
+    }
+})
 
 
 if (localStorage.getItem("lat") && localStorage.getItem("long")) {
@@ -114,8 +123,8 @@ function loadHome() {
     var homeInner = `
     <div class="content container">
         <div class="top-box">
-            <h3>Map Info</h3>
-            <p>The map on the right side contains data for the history of the earthquakes that has taken place in the entire world that had a bigger magnitude than 7 (marked with markers). It also includes some risky areas in big red circles.</p>
+            <h3>About</h3>
+            <p>SeismoRez is a website that has courses and forums to make the site interactive and educative related to being better prepared for earthquakes. Move along the Learn and Forum pages or the map on the right to learn more about earthquakes.</p>
         </div>
         <div class="fact-box top-box">
             <h3>Random Earthquake Fact: </h3>
@@ -142,6 +151,10 @@ function loadHome() {
 
     <div class="map container">
         <div id="map"></div>
+        <div class="slidecontainer">
+            <input type="range" min="1900" max="2023" value="2023" class="slider" id="yearSlider">
+            <p>Year: <span id="yearVal">2023</span></p>
+        </div>
     </div>`
     pageContainer.innerHTML = homeInner;
     if (window.navigator.geolocation) {
@@ -258,15 +271,15 @@ function loadForum() {
 }
 
 // if a current hash is present
-if (window.location.hash == "#learn") {
-    loadLearn();
-}
-else if (window.location.hash == "#forum") {
-    loadForum();
-}
-else {
-    loadHome();
-}
+// if (window.location.hash == "#learn") {
+//     loadLearn();
+// }
+// else if (window.location.hash == "#forum") {
+//     loadForum();
+// }
+// else {
+//     loadHome();
+// }
 
 // // store the previously visited page even if the page is reloaded
 // if (localStorage.getItem("page") == "home") {
@@ -279,13 +292,29 @@ else {
 //     loadForum();
 // }
 
+function onEachFeature(feature, layer) {
+    let popupContent = `<p>An earthquake with ${feature.properties.mag} magnitude in ${feature.properties.place}</p>`;
+
+    if (feature.properties && feature.properties.popupContent) {
+        popupContent += feature.properties.popupContent;
+    }
+
+    layer.bindPopup(popupContent);
+}
+
 // initialize map 
-function mapInit(lat, long) {
-    var map = L.map('map').setView([lat, long], 11);
+function mapInit(lat, long, zoom=11, popup=true) {
+    map = L.map('map').setView([lat, long], zoom);
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 20,
     }).addTo(map);
 
+    if (popup) {
+        L.popup([lat,long], 
+            {content: '<p>Move around the map to see different regions. This map contains data for the history of the earthquakes that has taken place in the entire world that had a bigger magnitude than 7 (marked with markers). It also includes some risky areas in big red circles. You can close the popup!</p>'})
+        .openOn(map);        
+    }
+    
     let riskyAreas = [[37.402179, 35.652607], [41.102179, 28.852607]]
     for (let riskyArea of riskyAreas) {
         let circle = L.circle(riskyArea, {   
@@ -308,16 +337,34 @@ function mapInit(lat, long) {
     fetch("./locations.json")
         .then(response => response.json())
         .then((json) => {
-            data = []
+            console.log(json.features); 
+            data = []; 
             for (let feature of json.features) {
                 let d = new Date(0); 
                 d.setUTCMilliseconds(feature["properties"]["time"]);
                 let year = d.getFullYear();
-                // if (sliderValue.innerHTML > year) {
-                data.push(feature); 
-                // }
+                if (sliderValue.innerHTML > year) {
+                    data.push(feature); 
+                }
             }
-            json.features = data; 
-            L.geoJSON(json).addTo(map);
+        
+             json.features = data; 
+
+            let features = L.geoJSON(json,{
+
+                filter(feature, layer) {
+                    if (feature.properties) {
+                        let d = new Date(0); 
+                        d.setUTCMilliseconds(feature["properties"]["time"]);
+                        let year = d.getFullYear();
+                        return year < sliderValue.innerHTML;
+                        // If the property "underConstruction" exists and is true, return false (don't render features under construction)
+                        return feature.properties.underConstruction !== undefined ? !feature.properties.underConstruction : true;
+                    }
+                    return false;
+                },
+        
+                onEachFeature
+            }).addTo(map);
         })
 }
